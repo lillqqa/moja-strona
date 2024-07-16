@@ -118,6 +118,26 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .admin-section {
+            display: none;
+        }
+        .admin-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .admin-section th, .admin-section td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .admin-section th {
+            background-color: #ff69b4;
+            color: white;
+        }
+        .admin-section td {
+            background-color: #fff;
+        }
         @media (max-width: 768px) {
             .container {
                 width: 90%;
@@ -221,6 +241,25 @@
                 <button onclick="login()">Zaloguj się</button>
             </div>
         </section>
+
+        <section id="admin-section" class="admin-section">
+            <h2>Lista Rezerwacji</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data i godzina</th>
+                        <th>Imię i Nazwisko</th>
+                        <th>Telefon</th>
+                        <th>E-mail</th>
+                        <th>Usługa</th>
+                        <th>Komentarze</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody id="reservations-list">
+                </tbody>
+            </table>
+        </section>
     </div>
 
     <footer>
@@ -230,15 +269,58 @@
     <script>
         const adminPassword = "TwojeHaslo"; // Zamień na swoje hasło
         let isAdmin = false;
+        const reservations = [];
 
         function login() {
             const inputPassword = document.getElementById('admin-password').value;
             if (inputPassword === adminPassword) {
                 document.getElementById('admin-login').style.display = 'none';
+                document.querySelector('.admin-section').style.display = 'block';
                 isAdmin = true;
+                renderReservations();
                 $('#calendar').fullCalendar('render');
             } else {
                 alert('Nieprawidłowe hasło');
+            }
+        }
+
+        function renderReservations() {
+            const reservationsList = document.getElementById('reservations-list');
+            reservationsList.innerHTML = '';
+            reservations.forEach((reservation, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${reservation.start}</td>
+                    <td>${reservation.title.split(' - ')[0]}</td>
+                    <td>${reservation.extendedProps.phone}</td>
+                    <td>${reservation.extendedProps.email}</td>
+                    <td>${reservation.title.split(' - ')[1]}</td>
+                    <td>${reservation.extendedProps.comments}</td>
+                    <td>
+                        <button onclick="editReservation(${index})">Edytuj</button>
+                        <button onclick="deleteReservation(${index})">Usuń</button>
+                    </td>
+                `;
+                reservationsList.appendChild(row);
+            });
+        }
+
+        function editReservation(index) {
+            const reservation = reservations[index];
+            const newTitle = prompt('Wprowadź nowy tytuł rezerwacji:', reservation.title);
+            if (newTitle) {
+                reservation.title = newTitle;
+                $('#calendar').fullCalendar('updateEvent', reservation);
+                renderReservations();
+            }
+        }
+
+        function deleteReservation(index) {
+            if (confirm('Czy na pewno chcesz usunąć tę rezerwację?')) {
+                const reservation = reservations[index];
+                $('#calendar').fullCalendar('removeEvents', reservation._id);
+                reservations.splice(index, 1);
+                renderReservations();
             }
         }
 
@@ -257,27 +339,23 @@
                         const eventData = {
                             title: title,
                             start: start,
-                            end: end
+                            end: end,
+                            extendedProps: {}
                         };
+                        reservations.push(eventData);
                         $('#calendar').fullCalendar('renderEvent', eventData, true);
+                        renderReservations();
                     }
                     $('#calendar').fullCalendar('unselect');
                 },
                 eventClick: function(event) {
                     if (isAdmin) {
-                        const newTitle = prompt('Wprowadź nowy tytuł rezerwacji:', event.title);
-                        if (newTitle) {
-                            event.title = newTitle;
-                            $('#calendar').fullCalendar('updateEvent', event);
-                        }
-                        if (confirm(`Czy na pewno chcesz usunąć rezerwację "${event.title}"?`)) {
-                            $('#calendar').fullCalendar('removeEvents', event._id);
-                        }
+                        editReservation(reservations.indexOf(event));
                     } else {
                         alert('Tylko administrator może edytować lub usuwać rezerwacje.');
                     }
                 },
-                events: []
+                events: reservations
             });
 
             document.getElementById('add-event').addEventListener('click', function() {
@@ -297,7 +375,9 @@
                             comments: comments
                         }
                     };
+                    reservations.push(eventData);
                     $('#calendar').fullCalendar('renderEvent', eventData, true);
+                    renderReservations();
                 }
             });
         });
