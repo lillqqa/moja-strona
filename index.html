@@ -148,6 +148,43 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .calendar .day {
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            text-align: center;
+            position: relative;
+        }
+        .calendar .day.reserved {
+            background-color: #ffccd5;
+        }
+        .calendar .day button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff1493;
+            color: white;
+            border: none;
+            padding: 2px 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .booking-form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        .booking-form input, .booking-form select, .booking-form textarea {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -179,25 +216,25 @@
 
     <div id="main-content" class="container">
         <section id="calendar">
-            <h2>Kalendarz</h2>
-            <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=Europe%2FWarsaw" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+            <h2>Kalendarz Rezerwacji</h2>
+            <div class="calendar" id="calendar"></div>
         </section>
 
         <section id="booking-form">
             <h2>Formularz Rezerwacji</h2>
-            <form action="https://your-backend-endpoint" method="post">
-                <input type="text" name="name" placeholder="Imię i Nazwisko" required>
-                <input type="tel" name="phone" placeholder="Numer Telefonu" required>
-                <input type="email" name="email" placeholder="E-mail" required>
-                <select name="service" required>
+            <div class="booking-form">
+                <input type="text" id="name" placeholder="Imię i Nazwisko" required>
+                <input type="tel" id="phone" placeholder="Numer Telefonu" required>
+                <input type="email" id="email" placeholder="E-mail" required>
+                <select id="service" required>
                     <option value="">Wybierz usługę</option>
                     <option value="service1">Usługa 1</option>
                     <option value="service2">Usługa 2</option>
                     <option value="service3">Usługa 3</option>
                 </select>
-                <textarea name="comments" placeholder="Dodatkowe uwagi"></textarea>
-                <input type="submit" value="Zarezerwuj">
-            </form>
+                <textarea id="comments" placeholder="Dodatkowe uwagi"></textarea>
+                <button onclick="makeReservation()">Zarezerwuj</button>
+            </div>
         </section>
 
         <section id="admin-login">
@@ -223,6 +260,7 @@
 
     <script>
         const adminPassword = "TwojeHaslo"; // Zamień na swoje hasło
+        const reservations = [];
 
         function login() {
             const inputPassword = document.getElementById('admin-password').value;
@@ -255,6 +293,41 @@
             const imgContainer = button.parentElement;
             imgContainer.remove();
         }
+
+        function makeReservation() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const service = document.getElementById('service').value;
+            const comments = document.getElementById('comments').value;
+            const date = prompt("Podaj datę rezerwacji (RRRR-MM-DD):");
+            if (date) {
+                reservations.push({ date, name, phone, email, service, comments });
+                alert("Rezerwacja została dodana!");
+                renderCalendar();
+            }
+        }
+
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            const daysInMonth = new Date(2024, 8, 0).getDate(); // Wrzesień 2024
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day');
+                const date = `2024-09-${i < 10 ? '0' + i : i}`;
+                day.textContent = i;
+                const reservation = reservations.find(r => r.date === date);
+                if (reservation) {
+                    day.classList.add('reserved');
+                    day.innerHTML += `<br>${reservation.name}`;
+                    day.innerHTML += `<br>${reservation.service}`;
+                }
+                calendar.appendChild(day);
+            }
+        }
+
+        renderCalendar();
     </script>
 </body>
 </html>
