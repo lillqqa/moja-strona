@@ -302,14 +302,19 @@
             fetch('get_reservations.php')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Fetched reservations:', data);
                     data.forEach(event => {
-                        reservations.push({
+                        const eventData = {
                             title: event.name,
                             start: event.datetime
-                        });
+                        };
+                        reservations.push(eventData);
                     });
                     renderCalendar();
                     renderReservations();
+                })
+                .catch(error => {
+                    console.error('Error fetching reservations:', error);
                 });
         }
 
@@ -337,6 +342,7 @@
         }
 
         function renderCalendar() {
+            console.log('Rendering calendar with events:', reservations);
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
@@ -356,6 +362,7 @@
                             extendedProps: {}
                         };
                         reservations.push(eventData);
+                        console.log('Selected event data:', eventData);
                         $('#calendar').fullCalendar('renderEvent', eventData, true);
                         renderReservations();
                     }
