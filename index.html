@@ -125,6 +125,23 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .admin-login {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .admin-login input[type="password"] {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .admin-login button {
+            background-color: #ff1493;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -177,11 +194,19 @@
             </form>
         </section>
 
-        <section id="admin-upload">
+        <section id="admin-upload" style="display: none;">
             <h2>Dodaj Obrazek</h2>
             <div class="admin-upload">
                 <input type="file" id="file-upload" accept="image/*">
                 <label for="file-upload">Wybierz plik</label>
+            </div>
+        </section>
+
+        <section id="admin-login">
+            <h2>Panel Administratora</h2>
+            <div class="admin-login">
+                <input type="password" id="admin-password" placeholder="Wprowadź hasło">
+                <button onclick="login()">Zaloguj się</button>
             </div>
         </section>
     </div>
@@ -191,7 +216,18 @@
     </footer>
 
     <script>
-        // JavaScript do obsługi przesyłania i usuwania obrazków przez administratora
+        const adminPassword = "poziomka1"; // Zamień na swoje hasło
+
+        function login() {
+            const inputPassword = document.getElementById('admin-password').value;
+            if (inputPassword === adminPassword) {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-upload').style.display = 'block';
+            } else {
+                alert('Nieprawidłowe hasło');
+            }
+        }
+
         document.getElementById('file-upload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
