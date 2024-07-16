@@ -9,7 +9,13 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #ffe6f0;
+            background: repeating-linear-gradient(
+                to bottom,
+                #ffe6f0, /* Różowy kolor */
+                #ffe6f0 50px,
+                #fff 50px,
+                #fff 100px
+            );
         }
         .container {
             width: 80%;
@@ -70,7 +76,7 @@
         }
         #main-content {
             padding: 20px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.8); /* Białe tło z przezroczystością, aby widzieć pasy */
             color: #333;
         }
         footer {
