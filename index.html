@@ -3,12 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moja Strona</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>LadyLillyLashes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffe6f0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        header {
+            background: #ff69b4; /* Różowy kolor */
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: #ff1493 3px solid; /* Ciemniejszy różowy */
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        #branding {
+            flex-grow: 1;
+        }
+        #branding img {
+            max-height: 70px;
+            margin-right: 20px;
+        }
+        #branding h1 {
+            display: inline;
+            margin: 0;
+            vertical-align: middle;
+        }
+        nav {
+            margin-top: 10px;
+        }
+        nav ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        nav ul li {
+            display: inline;
+            margin-left: 10px;
+        }
+        section#showcase {
+            min-height: 400px;
+            background: #ff1493;
+            color: #fff;
+            text-align: center;
+            padding-top: 100px;
+        }
+        section#showcase h1 {
+            font-size: 55px;
+            margin-top: 0;
+        }
+        section#showcase p {
+            font-size: 20px;
+        }
+        #main-content {
+            padding: 20px;
+            background: #fff;
+            color: #333;
+        }
+        footer {
+            padding: 20px;
+            margin-top: 20px;
+            color: #fff;
+            background-color: #ff69b4;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+            margin: 0 auto;
+        }
+        form input, form select, form textarea {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .admin-upload {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .admin-upload input[type="file"] {
+            display: none;
+        }
+        .admin-upload label {
+            background-color: #ff1493;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Moja Strona</h1>
+        <div id="branding">
+            <!-- Dodaj adres URL swojego obrazka poniżej -->
+            <img src="link-do-twojego-obrazka.jpg" alt="Logo">
+            <h1>LadyLillyLashes</h1>
+        </div>
         <nav>
             <ul>
                 <li><a href="#showcase">Strona Główna</a></li>
@@ -19,11 +132,13 @@
     </header>
 
     <section id="showcase">
-        <h1>Witamy na Mojej Stronie</h1>
-        <p>Zarezerwuj wizytę szybko i wygodnie</p>
-        <div class="image-container">
-            <!-- Zamień link-do-twojego-obrazka.jpg na URL swojego obrazka -->
-            <img src="link-do-twojego-obrazka.jpg" alt="Opis obrazka">
+        <div class="container">
+            <h1>Witamy na LadyLillyLashes</h1>
+            <p>Zarezerwuj wizytę szybko i wygodnie</p>
+            <div class="image-container">
+                <!-- Zamień link-do-twojego-obrazka.jpg na URL swojego obrazka -->
+                <img src="link-do-twojego-obrazka.jpg" alt="Opis obrazka">
+            </div>
         </div>
     </section>
 
@@ -49,10 +164,35 @@
                 <input type="submit" value="Zarezerwuj">
             </form>
         </section>
+
+        <section id="admin-upload">
+            <h2>Dodaj Obrazek</h2>
+            <div class="admin-upload">
+                <input type="file" id="file-upload" accept="image/*">
+                <label for="file-upload">Wybierz plik</label>
+            </div>
+        </section>
     </div>
 
     <footer>
-        <p>Moja Strona &copy; 2024</p>
+        <p>LadyLillyLashes &copy; 2024</p>
     </footer>
+
+    <script>
+        // JavaScript do obsługi przesyłania obrazków przez administratora
+        document.getElementById('file-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.classList.add('image-container');
+                    imgContainer.innerHTML = `<img src="${e.target.result}" alt="Nowy obrazek">`;
+                    document.getElementById('main-content').appendChild(imgContainer);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 </body>
 </html>
