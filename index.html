@@ -154,27 +154,33 @@
             gap: 5px;
             margin-top: 20px;
         }
-        .calendar .day {
-            padding: 10px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            text-align: center;
-            position: relative;
-        }
-        .calendar .day.reserved {
-            background-color: #ffccd5;
-        }
-        .calendar .day button {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: #ff1493;
-            color: white;
-            border: none;
-            padding: 2px 5px;
-            cursor: pointer;
-            border-radius: 3px;
-        }
+        .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.calendar .day {
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    text-align: center;
+    position: relative;
+}
+
+.calendar .day.reserved {
+    background-color: #ffccd5;
+}
+
+.calendar .day-header {
+    font-weight: bold;
+    background-color: #ff69b4;
+    color: white;
+}
         .booking-form {
             display: flex;
             flex-direction: column;
