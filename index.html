@@ -94,10 +94,22 @@
         .image-container {
             text-align: center;
             margin: 20px 0;
+            position: relative;
         }
         .image-container img {
             max-width: 100%;
             height: auto;
+        }
+        .image-container button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff1493;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
         }
         .admin-upload {
             text-align: center;
@@ -179,7 +191,7 @@
     </footer>
 
     <script>
-        // JavaScript do obsługi przesyłania obrazków przez administratora
+        // JavaScript do obsługi przesyłania i usuwania obrazków przez administratora
         document.getElementById('file-upload').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -187,12 +199,20 @@
                 reader.onload = function(e) {
                     const imgContainer = document.createElement('div');
                     imgContainer.classList.add('image-container');
-                    imgContainer.innerHTML = `<img src="${e.target.result}" alt="Nowy obrazek">`;
+                    imgContainer.innerHTML = `
+                        <img src="${e.target.result}" alt="Nowy obrazek">
+                        <button onclick="removeImage(this)">Usuń</button>
+                    `;
                     document.getElementById('main-content').appendChild(imgContainer);
                 };
                 reader.readAsDataURL(file);
             }
         });
+
+        function removeImage(button) {
+            const imgContainer = button.parentElement;
+            imgContainer.remove();
+        }
     </script>
 </body>
 </html>
