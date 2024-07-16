@@ -161,7 +161,7 @@
             padding: 10px;
             background-color: #f8f8f8;
             border: 1px solid #ddd;
-            text-align: center;
+            text-align: left;
             position: relative;
         }
         .calendar .day.reserved {
@@ -171,6 +171,7 @@
             font-weight: bold;
             background-color: #ff69b4;
             color: white;
+            text-align: center;
         }
         .booking-form {
             display: flex;
@@ -181,6 +182,17 @@
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
+        }
+        .edit-reservation {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff1493;
+            color: white;
+            border: none;
+            padding: 2px 5px;
+            cursor: pointer;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -265,6 +277,9 @@
             if (inputPassword === adminPassword) {
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-upload').style.display = 'block';
+                document.querySelectorAll('.edit-reservation').forEach(button => {
+                    button.style.display = 'block';
+                });
             } else {
                 alert('Nieprawidłowe hasło');
             }
@@ -306,6 +321,15 @@
             }
         }
 
+        function editReservation(index) {
+            const reservation = reservations[index];
+            const newDatetime = prompt("Podaj nową datę i godzinę rezerwacji (RRRR-MM-DDTHH:MM)", reservation.datetime);
+            if (newDatetime) {
+                reservations[index].datetime = newDatetime;
+                renderCalendar();
+            }
+        }
+
         function renderCalendar() {
             const calendar = document.getElementById('calendar');
             calendar.innerHTML = '';
@@ -343,9 +367,18 @@
                 const dayReservations = reservations.filter(r => r.datetime.startsWith(date));
                 if (dayReservations.length > 0) {
                     day.classList.add('reserved');
-                    dayReservations.forEach(reservation => {
+                    dayReservations.forEach((reservation, index) => {
                         const time = reservation.datetime.split('T')[1];
-                        day.innerHTML += `<br>${time} - ${reservation.name}`;
+                        const reservationElement = document.createElement('div');
+                        reservationElement.innerHTML = `${time} - ${reservation.name}`;
+                        if (document.getElementById('admin-password').value === adminPassword) {
+                            const editButton = document.createElement('button');
+                            editButton.classList.add('edit-reservation');
+                            editButton.textContent = 'Edytuj';
+                            editButton.onclick = () => editReservation(index);
+                            reservationElement.appendChild(editButton);
+                        }
+                        day.appendChild(reservationElement);
                     });
                 }
                 calendar.appendChild(day);
