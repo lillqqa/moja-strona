@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LadyLillyLashes</title>
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+    <link href='https://fullcalendar.io/releases/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
+    <script src='https://fullcalendar.io/releases/fullcalendar/3.10.2/lib/moment.min.js'></script>
+    <script src='https://fullcalendar.io/releases/fullcalendar/3.10.2/lib/jquery.min.js'></script>
+    <script src='https://fullcalendar.io/releases/fullcalendar/3.10.2/fullcalendar.min.js'></script>
     <style>
+        /* Dodatkowe style */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -98,26 +102,6 @@
             padding: 10px;
             font-size: 16px;
         }
-        .image-container {
-            text-align: center;
-            margin: 20px 0;
-            position: relative;
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-        }
-        .image-container button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #ff1493;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
         .admin-upload {
             text-align: center;
             margin: 20px 0;
@@ -148,27 +132,6 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-        }
-        #calendar {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .admin-section {
-            display: none;
-            margin-top: 20px;
-        }
-        .admin-section table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .admin-section th, .admin-section td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .admin-section th {
-            background-color: #ff69b4;
-            color: white;
         }
     </style>
 </head>
@@ -202,7 +165,7 @@
     <div id="main-content" class="container">
         <section id="calendar">
             <h2>Kalendarz Rezerwacji</h2>
-            <div id='calendar'></div>
+            <div id="calendar"></div>
         </section>
 
         <section id="booking-form">
@@ -217,9 +180,8 @@
                     <option value="service2">Usługa 2</option>
                     <option value="service3">Usługa 3</option>
                 </select>
-                <input type="datetime-local" id="datetime" required>
                 <textarea id="comments" placeholder="Dodatkowe uwagi"></textarea>
-                <button onclick="makeReservation()">Zarezerwuj</button>
+                <button id="add-event">Zarezerwuj</button>
             </div>
         </section>
 
@@ -238,43 +200,24 @@
                 <label for="file-upload">Wybierz plik</label>
             </div>
         </section>
-
-        <section id="admin-section" class="admin-section">
-            <h2>Rezerwacje</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data i godzina</th>
-                        <th>Imię i nazwisko</th>
-                        <th>Telefon</th>
-                        <th>E-mail</th>
-                        <th>Usługa</th>
-                        <th>Komentarze</th>
-                        <th>Akcje</th>
-                    </tr>
-                </thead>
-                <tbody id="reservations-table-body">
-                </tbody>
-            </table>
-        </section>
     </div>
 
     <footer>
         <p>LadyLillyLashes &copy; 2024</p>
     </footer>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
     <script>
         const adminPassword = "TwojeHaslo"; // Zamień na swoje hasło
         let reservations = [];
+        let isAdmin = false;
 
         function login() {
             const inputPassword = document.getElementById('admin-password').value;
             if (inputPassword === adminPassword) {
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-upload').style.display = 'block';
-                document.getElementById('admin-section').style.display = 'block';
-                renderAdminSection();
+                isAdmin = true;
+                calendar.render();
             } else {
                 alert('Nieprawidłowe hasło');
             }
@@ -302,86 +245,89 @@
             imgContainer.remove();
         }
 
-        function makeReservation() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
-            const service = document.getElementById('service').value;
-            const comments = document.getElementById('comments').value;
-            const datetime = document.getElementById('datetime').value;
-            if (datetime) {
-                const reservation = { id: reservations.length + 1, title: `${name} - ${service}`, start: datetime, end: datetime, extendedProps: { phone, email, comments }};
-                reservations.push(reservation);
-                alert("Rezerwacja została dodana!");
-                renderCalendar();
-                renderAdminSection();
-            }
-        }
-
-        function editReservation(id) {
-            const reservation = reservations.find(r => r.id === id);
-            const newDatetime = prompt("Podaj nową datę i godzinę rezerwacji (RRRR-MM-DDTHH:MM)", reservation.start);
-            if (newDatetime) {
-                reservation.start = newDatetime;
-                reservation.end = newDatetime;
-                renderCalendar();
-                renderAdminSection();
-            }
-        }
-
-        function deleteReservation(id) {
-            if (confirm("Czy na pewno chcesz usunąć tę rezerwację?")) {
-                reservations = reservations.filter(r => r.id !== id);
-                renderCalendar();
-                renderAdminSection();
-            }
-        }
-
-        function renderAdminSection() {
-            const reservationsTableBody = document.getElementById('reservations-table-body');
-            reservationsTableBody.innerHTML = '';
-            reservations.forEach(reservation => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${reservation.start}</td>
-                    <td>${reservation.title.split(' - ')[0]}</td>
-                    <td>${reservation.extendedProps.phone}</td>
-                    <td>${reservation.extendedProps.email}</td>
-                    <td>${reservation.title.split(' - ')[1]}</td>
-                    <td>${reservation.extendedProps.comments}</td>
-                    <td>
-                        <button onclick="editReservation(${reservation.id})">Edytuj</button>
-                        <button onclick="deleteReservation(${reservation.id})">Usuń</button>
-                    </td>
-                `;
-                reservationsTableBody.appendChild(row);
-            });
-        }
-
-        function renderCalendar() {
+        document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
+
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                locale: 'pl',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                events: reservations,
-                eventClick: function(info) {
-                    if (document.getElementById('admin-password').value === adminPassword) {
-                        if (confirm(`Czy chcesz edytować rezerwację: ${info.event.title}?`)) {
-                            editReservation(info.event.id);
+                editable: true,
+                selectable: true,
+                select: function(info) {
+                    if (isAdmin) {
+                        const datetime = info.startStr;
+                        const name = prompt('Imię i nazwisko:');
+                        const phone = prompt('Numer telefonu:');
+                        const email = prompt('E-mail:');
+                        const service = prompt('Usługa:');
+                        const comments = prompt('Dodatkowe uwagi:');
+                        if (name && phone && email && service) {
+                            const eventData = {
+                                title: `${name} - ${service}`,
+                                start: datetime,
+                                extendedProps: {
+                                    phone: phone,
+                                    email: email,
+                                    comments: comments
+                                }
+                            };
+                            calendar.addEvent(eventData);
+                            reservations.push(eventData);
+                            localStorage.setItem('reservations', JSON.stringify(reservations));
                         }
+                    } else {
+                        alert('Tylko administrator może dodawać rezerwacje.');
+                    }
+                },
+                eventClick: function(info) {
+                    if (isAdmin) {
+                        const event = info.event;
+                        if (confirm(`Czy na pewno chcesz usunąć rezerwację "${event.title}"?`)) {
+                            event.remove();
+                            reservations = reservations.filter(r => r.id !== event.id);
+                            localStorage.setItem('reservations', JSON.stringify(reservations));
+                        }
+                    }
+                },
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    const storedReservations = localStorage.getItem('reservations');
+                    if (storedReservations) {
+                        reservations = JSON.parse(storedReservations);
+                        successCallback(reservations);
+                    } else {
+                        successCallback([]);
                     }
                 }
             });
-            calendar.render();
-        }
 
-        // Wywołanie renderCalendar, aby początkowo wyświetlić kalendarz
-        renderCalendar();
+            calendar.render();
+
+            document.getElementById('add-event').addEventListener('click', function() {
+                if (!isAdmin) {
+                    alert('Tylko administrator może dodawać rezerwacje.');
+                    return;
+                }
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                const email = document.getElementById('email').value;
+                const service = document.getElementById('service').value;
+                const comments = document.getElementById('comments').value;
+                const datetime = prompt('Podaj datę i godzinę rezerwacji (RRRR-MM-DDTHH:MM)');
+                if (name && phone && email && service && datetime) {
+                    const eventData = {
+                        title: `${name} - ${service}`,
+                        start: datetime,
+                        extendedProps: {
+                            phone: phone,
+                            email: email,
+                            comments: comments
+                        }
+                    };
+                    calendar.addEvent(eventData);
+                    reservations.push(eventData);
+                    localStorage.setItem('reservations', JSON.stringify(reservations));
+                }
+            });
+        });
     </script>
 </body>
 </html>
