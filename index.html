@@ -179,6 +179,7 @@
                     <option value="service2">Usługa 2</option>
                     <option value="service3">Usługa 3</option>
                 </select>
+                <input type="datetime-local" id="datetime" required>
                 <textarea id="comments" placeholder="Dodatkowe uwagi"></textarea>
                 <button id="add-event">Zarezerwuj</button>
             </div>
@@ -253,42 +254,36 @@
                 editable: true,
                 selectable: true,
                 select: function(start, end) {
-                    if (isAdmin) {
-                        const title = prompt('Wprowadź tytuł rezerwacji:');
-                        if (title) {
-                            const eventData = {
-                                title: title,
-                                start: start,
-                                end: end
-                            };
-                            $('#calendar').fullCalendar('renderEvent', eventData, true);
-                        }
-                        $('#calendar').fullCalendar('unselect');
-                    } else {
-                        alert('Tylko administrator może dodawać rezerwacje.');
+                    const title = prompt('Wprowadź tytuł rezerwacji:');
+                    if (title) {
+                        const eventData = {
+                            title: title,
+                            start: start,
+                            end: end
+                        };
+                        $('#calendar').fullCalendar('renderEvent', eventData, true);
                     }
+                    $('#calendar').fullCalendar('unselect');
                 },
                 eventClick: function(event) {
                     if (isAdmin) {
                         if (confirm(`Czy na pewno chcesz usunąć rezerwację "${event.title}"?`)) {
                             $('#calendar').fullCalendar('removeEvents', event._id);
                         }
+                    } else {
+                        alert('Tylko administrator może edytować lub usuwać rezerwacje.');
                     }
                 },
                 events: []
             });
 
             document.getElementById('add-event').addEventListener('click', function() {
-                if (!isAdmin) {
-                    alert('Tylko administrator może dodawać rezerwacje.');
-                    return;
-                }
                 const name = document.getElementById('name').value;
                 const phone = document.getElementById('phone').value;
                 const email = document.getElementById('email').value;
                 const service = document.getElementById('service').value;
                 const comments = document.getElementById('comments').value;
-                const datetime = prompt('Podaj datę i godzinę rezerwacji (RRRR-MM-DDTHH:MM)');
+                const datetime = document.getElementById('datetime').value;
                 if (name && phone && email && service && datetime) {
                     const eventData = {
                         title: `${name} - ${service}`,
