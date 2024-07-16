@@ -138,6 +138,12 @@
         .admin-section td {
             background-color: #fff;
         }
+        .admin-section .admin-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
         @media (max-width: 768px) {
             .container {
                 width: 90%;
@@ -244,6 +250,9 @@
 
         <section id="admin-section" class="admin-section">
             <h2>Lista Rezerwacji</h2>
+            <div class="admin-actions">
+                <button onclick="showAddSlotForm()">Dodaj dostępne godziny</button>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -259,6 +268,11 @@
                 <tbody id="reservations-list">
                 </tbody>
             </table>
+            <div id="add-slot-form" style="display: none;">
+                <h3>Dodaj dostępne godziny</h3>
+                <input type="datetime-local" id="slot-datetime">
+                <button onclick="addAvailableSlot()">Dodaj</button>
+            </div>
         </section>
     </div>
 
@@ -270,6 +284,7 @@
         const adminPassword = "TwojeHaslo"; // Zamień na swoje hasło
         let isAdmin = false;
         const reservations = [];
+        const availableSlots = [];
 
         function login() {
             const inputPassword = document.getElementById('admin-password').value;
@@ -278,6 +293,7 @@
                 document.querySelector('.admin-section').style.display = 'block';
                 isAdmin = true;
                 renderReservations();
+                renderAvailableSlots();
                 $('#calendar').fullCalendar('render');
             } else {
                 alert('Nieprawidłowe hasło');
@@ -305,6 +321,18 @@
             });
         }
 
+        function renderAvailableSlots() {
+            availableSlots.forEach(slot => {
+                const eventData = {
+                    title: 'Dostępne',
+                    start: slot,
+                    editable: false,
+                    color: 'green'
+                };
+                $('#calendar').fullCalendar('renderEvent', eventData, true);
+            });
+        }
+
         function editReservation(index) {
             const reservation = reservations[index];
             const newTitle = prompt('Wprowadź nowy tytuł rezerwacji:', reservation.title);
@@ -321,6 +349,19 @@
                 $('#calendar').fullCalendar('removeEvents', reservation._id);
                 reservations.splice(index, 1);
                 renderReservations();
+            }
+        }
+
+        function showAddSlotForm() {
+            document.getElementById('add-slot-form').style.display = 'block';
+        }
+
+        function addAvailableSlot() {
+            const slotDatetime = document.getElementById('slot-datetime').value;
+            if (slotDatetime) {
+                availableSlots.push(slotDatetime);
+                renderAvailableSlots();
+                document.getElementById('add-slot-form').style.display = 'none';
             }
         }
 
@@ -355,7 +396,12 @@
                         alert('Tylko administrator może edytować lub usuwać rezerwacje.');
                     }
                 },
-                events: reservations
+                events: reservations.concat(availableSlots.map(slot => ({
+                    title: 'Dostępne',
+                    start: slot,
+                    editable: false,
+                    color: 'green'
+                })))
             });
 
             document.getElementById('add-event').addEventListener('click', function() {
