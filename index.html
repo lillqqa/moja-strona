@@ -307,14 +307,16 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${reservation.start}</td>
-                    <td>${reservation.title.split(' - ')[0]}</td>
+                    <td>${reservation.title}</td>
                     <td>${reservation.extendedProps.phone}</td>
                     <td>${reservation.extendedProps.email}</td>
-                    <td>${reservation.title.split(' - ')[1]}</td>
+                    <td>${reservation.extendedProps.service}</td>
                     <td>${reservation.extendedProps.comments}</td>
                     <td>
                         <button onclick="editReservation(${index})">Edytuj</button>
                         <button onclick="deleteReservation(${index})">Usuń</button>
+                        <button onclick="sendEmail(${index}, 'accepted')">Zaakceptuj</button>
+                        <button onclick="sendEmail(${index}, 'rejected')">Odrzuć</button>
                     </td>
                 `;
                 reservationsList.appendChild(row);
@@ -335,7 +337,7 @@
 
         function editReservation(index) {
             const reservation = reservations[index];
-            const newTitle = prompt('Wprowadź nowy tytuł rezerwacji:', reservation.title);
+            const newTitle = prompt('Wprowadź nowe imię:', reservation.title);
             if (newTitle) {
                 reservation.title = newTitle;
                 $('#calendar').fullCalendar('updateEvent', reservation);
@@ -365,6 +367,22 @@
             }
         }
 
+        function sendEmail(index, status) {
+            const reservation = reservations[index];
+            const email = reservation.extendedProps.email;
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'send_email.php', true); // Zamień na URL swojego skryptu PHP
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send(`email=${email}&status=${status}`);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert(`Email o statusie rezerwacji został wysłany do ${email}`);
+                } else {
+                    alert('Wystąpił błąd podczas wysyłania emaila.');
+                }
+            };
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             $('#calendar').fullCalendar({
                 header: {
@@ -375,7 +393,7 @@
                 editable: true,
                 selectable: true,
                 select: function(start, end) {
-                    const title = prompt('Wprowadź tytuł rezerwacji:');
+                    const title = prompt('Wprowadź swoje imię:');
                     if (title) {
                         const eventData = {
                             title: title,
@@ -413,11 +431,12 @@
                 const datetime = document.getElementById('datetime').value;
                 if (name && phone && email && service && datetime) {
                     const eventData = {
-                        title: `${name} - ${service}`,
+                        title: name,
                         start: datetime,
                         extendedProps: {
                             phone: phone,
                             email: email,
+                            service: service,
                             comments: comments
                         }
                     };
