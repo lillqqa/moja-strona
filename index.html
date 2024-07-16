@@ -153,34 +153,25 @@
             grid-template-columns: repeat(7, 1fr);
             gap: 5px;
             margin-top: 20px;
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ddd;
         }
-        .calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    margin-top: 20px;
-    background-color: #fff;
-    padding: 10px;
-    border: 1px solid #ddd;
-}
-
-.calendar .day {
-    padding: 10px;
-    background-color: #f8f8f8;
-    border: 1px solid #ddd;
-    text-align: center;
-    position: relative;
-}
-
-.calendar .day.reserved {
-    background-color: #ffccd5;
-}
-
-.calendar .day-header {
-    font-weight: bold;
-    background-color: #ff69b4;
-    color: white;
-}
+        .calendar .day {
+            padding: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            text-align: center;
+            position: relative;
+        }
+        .calendar .day.reserved {
+            background-color: #ffccd5;
+        }
+        .calendar .day-header {
+            font-weight: bold;
+            background-color: #ff69b4;
+            color: white;
+        }
         .booking-form {
             display: flex;
             flex-direction: column;
@@ -239,6 +230,7 @@
                     <option value="service3">Usługa 3</option>
                 </select>
                 <textarea id="comments" placeholder="Dodatkowe uwagi"></textarea>
+                <input type="datetime-local" id="datetime" required>
                 <button onclick="makeReservation()">Zarezerwuj</button>
             </div>
         </section>
@@ -279,61 +271,4 @@
         }
 
         document.getElementById('file-upload').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const imgContainer = document.createElement('div');
-                    imgContainer.classList.add('image-container');
-                    imgContainer.innerHTML = `
-                        <img src="${e.target.result}" alt="Nowy obrazek">
-                        <button onclick="removeImage(this)">Usuń</button>
-                    `;
-                    document.getElementById('main-content').appendChild(imgContainer);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function removeImage(button) {
-            const imgContainer = button.parentElement;
-            imgContainer.remove();
-        }
-
-        function makeReservation() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
-            const service = document.getElementById('service').value;
-            const comments = document.getElementById('comments').value;
-            const date = prompt("Podaj datę rezerwacji (RRRR-MM-DD):");
-            if (date) {
-                reservations.push({ date, name, phone, email, service, comments });
-                alert("Rezerwacja została dodana!");
-                renderCalendar();
-            }
-        }
-
-        function renderCalendar() {
-            const calendar = document.getElementById('calendar');
-            calendar.innerHTML = '';
-            const daysInMonth = new Date(2024, 8, 0).getDate(); // Wrzesień 2024
-            for (let i = 1; i <= daysInMonth; i++) {
-                const day = document.createElement('div');
-                day.classList.add('day');
-                const date = `2024-09-${i < 10 ? '0' + i : i}`;
-                day.textContent = i;
-                const reservation = reservations.find(r => r.date === date);
-                if (reservation) {
-                    day.classList.add('reserved');
-                    day.innerHTML += `<br>${reservation.name}`;
-                    day.innerHTML += `<br>${reservation.service}`;
-                }
-                calendar.appendChild(day);
-            }
-        }
-
-        renderCalendar();
-    </script>
-</body>
-</html>
+            const file = event.target.files[0
