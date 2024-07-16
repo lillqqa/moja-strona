@@ -194,6 +194,23 @@
             cursor: pointer;
             border-radius: 3px;
         }
+        .admin-section {
+            display: none;
+            margin-top: 20px;
+        }
+        .admin-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .admin-section th, .admin-section td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .admin-section th {
+            background-color: #ff69b4;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -262,6 +279,25 @@
                 <label for="file-upload">Wybierz plik</label>
             </div>
         </section>
+
+        <section id="admin-section" class="admin-section">
+            <h2>Rezerwacje</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data i godzina</th>
+                        <th>Imię i nazwisko</th>
+                        <th>Telefon</th>
+                        <th>E-mail</th>
+                        <th>Usługa</th>
+                        <th>Komentarze</th>
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody id="reservations-table-body">
+                </tbody>
+            </table>
+        </section>
     </div>
 
     <footer>
@@ -277,6 +313,8 @@
             if (inputPassword === adminPassword) {
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-upload').style.display = 'block';
+                document.getElementById('admin-section').style.display = 'block';
+                renderAdminSection();
                 document.querySelectorAll('.edit-reservation').forEach(button => {
                     button.style.display = 'block';
                 });
@@ -318,6 +356,7 @@
                 reservations.push({ datetime, name, phone, email, service, comments });
                 alert("Rezerwacja została dodana!");
                 renderCalendar();
+                renderAdminSection();
             }
         }
 
@@ -327,7 +366,37 @@
             if (newDatetime) {
                 reservations[index].datetime = newDatetime;
                 renderCalendar();
+                renderAdminSection();
             }
+        }
+
+        function deleteReservation(index) {
+            if (confirm("Czy na pewno chcesz usunąć tę rezerwację?")) {
+                reservations.splice(index, 1);
+                renderCalendar();
+                renderAdminSection();
+            }
+        }
+
+        function renderAdminSection() {
+            const reservationsTableBody = document.getElementById('reservations-table-body');
+            reservationsTableBody.innerHTML = '';
+            reservations.forEach((reservation, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${reservation.datetime}</td>
+                    <td>${reservation.name}</td>
+                    <td>${reservation.phone}</td>
+                    <td>${reservation.email}</td>
+                    <td>${reservation.service}</td>
+                    <td>${reservation.comments}</td>
+                    <td>
+                        <button onclick="editReservation(${index})">Edytuj</button>
+                        <button onclick="deleteReservation(${index})">Usuń</button>
+                    </td>
+                `;
+                reservationsTableBody.appendChild(row);
+            });
         }
 
         function renderCalendar() {
