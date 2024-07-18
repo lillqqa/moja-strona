@@ -292,30 +292,12 @@
                 document.getElementById('admin-login').style.display = 'none';
                 document.querySelector('.admin-section').style.display = 'block';
                 isAdmin = true;
-                fetchReservations();
+                renderReservations();
+                renderAvailableSlots();
+                $('#calendar').fullCalendar('render');
             } else {
                 alert('Nieprawidłowe hasło');
             }
-        }
-
-        function fetchReservations() {
-            fetch('get_reservations.php')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Fetched reservations:', data);
-                    data.forEach(event => {
-                        const eventData = {
-                            title: event.name,
-                            start: event.datetime
-                        };
-                        reservations.push(eventData);
-                    });
-                    renderCalendar();
-                    renderReservations();
-                })
-                .catch(error => {
-                    console.error('Error fetching reservations:', error);
-                });
         }
 
         function renderReservations() {
@@ -325,16 +307,14 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${reservation.start}</td>
-                    <td>${reservation.title}</td>
-                    <td>${reservation.extendedProps?.phone || ''}</td>
-                    <td>${reservation.extendedProps?.email || ''}</td>
-                    <td>${reservation.extendedProps?.service || ''}</td>
-                    <td>${reservation.extendedProps?.comments || ''}</td>
+                    <td>${reservation.title.split(' - ')[0]}</td>
+                    <td>${reservation.extendedProps.phone}</td>
+                    <td>${reservation.extendedProps.email}</td>
+                    <td>${reservation.title.split(' - ')[1]}</td>
+                    <td>${reservation.extendedProps.comments}</td>
                     <td>
                         <button onclick="editReservation(${index})">Edytuj</button>
                         <button onclick="deleteReservation(${index})">Usuń</button>
-                        <button onclick="sendEmail(${index}, 'accepted')">Zaakceptuj</button>
-                        <button onclick="sendEmail(${index}, 'rejected')">Odrzuć</button>
                     </td>
                 `;
                 reservationsList.appendChild(row);
@@ -375,12 +355,12 @@
                         alert('Tylko administrator może edytować lub usuwać rezerwacje.');
                     }
                 }
-            });
+           });
         }
 
         function editReservation(index) {
             const reservation = reservations[index];
-            const newTitle = prompt('Wprowadź nowe imię:', reservation.title);
+            const newTitle = prompt('Wprowadź nowy tytuł rezerwacji:', reservation.title);
             if (newTitle) {
                 reservation.title = newTitle;
                 $('#calendar').fullCalendar('updateEvent', reservation);
@@ -427,6 +407,44 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                editable: true,
+                selectable: true,
+                select: function(start, end) {
+                    const title = prompt('Wprowadź tytuł rezerwacji:');
+                    if (title) {
+                        const eventData = {
+                            title: title,
+                            start: start,
+                            end: end,
+                            extendedProps: {}
+                        };
+                        reservations.push(eventData);
+                        $('#calendar').fullCalendar('renderEvent', eventData, true);
+                        renderReservations();
+                    }
+                    $('#calendar').fullCalendar('unselect');
+                },
+                eventClick: function(event) {
+                    if (isAdmin) {
+                        editReservation(reservations.indexOf(event));
+                    } else {
+                        alert('Tylko administrator może edytować lub usuwać rezerwacje.');
+                    }
+                },
+                events: reservations.concat(availableSlots.map(slot => ({
+                    title: 'Dostępne',
+                    start: slot,
+                    editable: false,
+                    color: 'green'
+                })))
+            });
+
             document.getElementById('add-event').addEventListener('click', function() {
                 const name = document.getElementById('name').value;
                 const phone = document.getElementById('phone').value;
@@ -455,12 +473,13 @@
                             renderReservations();
                         } else {
                             alert('Wystąpił błąd podczas rezerwacji.');
-                        }
+                       }
                     };
-                    xhr.send(`name=${name}&phone=${phone}&email=${email}&service=${service}&datetime=${datetime}&comments=${comments}`);
+                    reservations.push(eventData);
+                    $('#calendar').fullCalendar('renderEvent', eventData, true);
+                    renderReservations();
                 }
             });
-            fetchReservations();
         });
     </script>
 </body>
